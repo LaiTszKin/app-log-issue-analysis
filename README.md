@@ -1,6 +1,6 @@
 # App Log Issue Analysis
 
-A Codex skill for evidence-driven application log investigations.
+An agent skill for evidence-driven application log investigations.
 
 This skill helps agents analyze logs end-to-end, correlate runtime signals with code paths, and produce actionable incident findings with confidence levels and remediation steps.
 

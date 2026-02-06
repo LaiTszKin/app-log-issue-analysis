@@ -44,6 +44,44 @@ Best results come from including:
 - Correlation IDs (trace/request/job/user/tx)
 - Relevant log excerpts and recent deploy/config context
 
+## Example
+
+### Input prompt
+
+```text
+Use $app-log-issue-analysis to investigate this production incident.
+
+Service: payment-api
+Environment: prod
+Time window: 2026-02-05 09:10 UTC to 2026-02-05 09:25 UTC
+
+Logs:
+2026-02-05T09:11:03Z WARN request_id=ab12 retry=1 upstream request timed out endpoint=/charge
+2026-02-05T09:11:05Z WARN request_id=ab12 retry=2 upstream request timed out endpoint=/charge
+2026-02-05T09:11:07Z ERROR request_id=ab12 deadline exceeded endpoint=/charge
+```
+
+### Expected response shape
+
+```text
+1) Incident summary
+- payment-api in prod shows repeated timeout escalation between 09:11:03 and 09:11:07 UTC.
+
+2) Confirmed issues
+- Symptom: escalating retries followed by deadline exceeded on /charge.
+- Log evidence: request_id=ab12 has two timeout warnings then one terminal error in 4 seconds.
+- Code correlation: correlate timeout path in request handler and upstream client call site.
+- Root cause analysis: likely dependency latency spike with insufficient retry backoff.
+- Impact: charge attempts fail for affected requests during the window.
+- Recommended remediation: add bounded exponential backoff with jitter and tighten timeout budgets.
+
+3) Hypotheses and required validation
+- Check upstream latency metrics and connection pool saturation for the same window.
+
+4) Monitoring and prevention improvements
+- Add alert on timeout-rate spike and include upstream host + timeout budget fields in logs.
+```
+
 ## Output expectations
 
 The skill is designed to return:
@@ -56,3 +94,7 @@ The skill is designed to return:
 ## Development notes
 
 This repository is intentionally lightweight and focused on reusable investigation guidance.
+
+## License
+
+MIT. See `LICENSE`.
